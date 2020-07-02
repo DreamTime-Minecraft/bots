@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<xml shutdownHook="disable">
+    <Properties>
+        <Property name="logPath">${sys:user.dir}/logs/</Property>
+    </Properties>
+    <Appenders>
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout>
+
+                <alwaysWriteExceptions>true</alwaysWriteExceptions>
+                <pattern>[%d{yyyy-MM-dd HH:mm:ss,SSS}] [%level] [%c{1}]: %m%n</pattern>
+            </PatternLayout>
+        </Console>
+        <RollingFile name="botsAppender" fileName="${logPath}/bots.log"
+                     filePattern="${logPath}/bots-%d{yyyy-MM-dd}.log" append="true" immediateFlush="true">
+
+            <PatternLayout>
+
+                <alwaysWriteExceptions>true</alwaysWriteExceptions>
+                <pattern>[%d{yyyy-MM-dd HH:mm:ss,SSS}] [%level] [%c{1}]: %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="botsAppender"/>
+            <AppenderRef ref="STDOUT"/>
+        </Root>
+    </Loggers>
+</xml>
