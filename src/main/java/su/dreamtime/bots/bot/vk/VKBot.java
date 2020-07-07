@@ -15,16 +15,17 @@ import com.vk.api.sdk.objects.groups.LongPollServer;
 import com.vk.api.sdk.objects.users.UserXtrCounters;
 import com.vk.api.sdk.queries.groups.GroupsGetLongPollServerQuery;
 import com.vk.api.sdk.queries.longpoll.GetLongPollEventsQuery;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 import su.dreamtime.bots.Client;
 import su.dreamtime.bots.Main;
 import su.dreamtime.bots.commands.common.Command;
 import su.dreamtime.bots.util.JsonParser;
 import su.dreamtime.bots.util.Util;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -39,22 +40,34 @@ public class VKBot {
     private GroupActor actor;
     private VkApiClient vkClient;
     private String hash;
-    private Set<Client> clients = new HashSet<>();
+    private Set<Client> clients = Collections.synchronizedSet(new HashSet<>());
 
-    private static ScheduledExecutorService execService;
-    private static ScheduledFuture<?> future = null;
-    private static String key;
-    private static String server;
-    private static String ts;
-    private static ScheduledFuture<?> refreshFuture = null;
-    private static ReentrantLock locker = new ReentrantLock();
-    private VKBot() {}
+    private ScheduledExecutorService execService;
+    private ScheduledFuture<?> future = null;
+    private String key;
+    private String server;
+    private String ts;
+    private ScheduledFuture<?> refreshFuture = null;
+    private ReentrantLock locker = new ReentrantLock();
 
+    private static Map<String, Level> loggerLevelMap = new HashMap<>();
+    static {
+        loggerLevelMap.put(HttpTransportClient.class.getName(), Level.WARN);
+        loggerLevelMap.put("HttpTransportClient", Level.WARN);
+        loggerLevelMap.put(TransportClient.class.getName(), Level.WARN);
+        loggerLevelMap.put("TransportClient", Level.WARN);
+
+        Logger l = LogManager.getLogger(HttpTransportClient.class);
+        loggerLevelMap.forEach((s, level) -> {
+            l.info(s + ": " + level.toString());
+        });
+    }
     private VKBot(int groupId, String accessToken) {
         this.groupId = groupId;
         this.accessToken = accessToken;
         this.hash = hashBot(groupId, accessToken);
         TransportClient client = new HttpTransportClient();
+        Configurator.setLevel(loggerLevelMap);
         vkClient = new VkApiClient(client);
         actor = new GroupActor(this.groupId, this.accessToken);
         initVKCommandExecutor();

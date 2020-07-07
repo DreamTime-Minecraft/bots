@@ -1,2 +1,2 @@
 !#/bin/bash
-mvn clean install -Dmaven.test.skip=true assembly:single
+mvn clean install -Dmaven.test.skip=true

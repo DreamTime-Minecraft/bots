@@ -1,10 +1,8 @@
 package su.dreamtime.bots;
 
-
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.config.Configurator;
 import su.dreamtime.bots.bot.vk.VKBot;
 import su.dreamtime.bots.bot.vk.VkCommandData;
 import su.dreamtime.bots.commands.common.Command;
@@ -31,7 +29,6 @@ public class Main {
     public static void main(String[] args) {
         tieSystemOutAndErrToLog();
 
-        Configurator.setLevel("com.vk.api.sdk.httpclient.HttpTransportClient", Level.OFF);
         Runtime.getRuntime().addShutdownHook(new Thread(Main::shutdown));
         setDefaults();
         try {
