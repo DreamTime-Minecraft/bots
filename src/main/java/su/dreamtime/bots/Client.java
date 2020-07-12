@@ -129,6 +129,7 @@ public class Client extends Thread implements AutoCloseable {
                 bot.getCommands().forEach((command, data) -> {
                     data.getListeningClients().removeIf(this::equals);
                 });
+                bot.removeClient(this);
             }
         }
         socket.close();

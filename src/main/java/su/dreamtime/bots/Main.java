@@ -41,6 +41,7 @@ public class Main {
                     clientSocket = serverSocket.accept();
                     runtimeLock.lock();
                     Client client = new Client(clientSocket);
+                    addClient(client);
                 } catch (Exception ex) {
                     try {
                         if (disconnecting) {

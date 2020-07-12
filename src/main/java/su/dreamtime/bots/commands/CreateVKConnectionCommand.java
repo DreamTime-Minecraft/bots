@@ -14,14 +14,17 @@ public class CreateVKConnectionCommand extends CommandResponse {
     public CreateVKConnectionCommand(Client c, String data) {
         Map<String, Object> mapData = JsonParser.parseData(data);
         if (mapData != null) {
-            Integer groupId = Integer.parseInt((String) mapData.get("groupId"));
+            if (mapData.get("groupId") == null || mapData.get("token") == null) {
+                success = false;
+                return;
+            }
+            int groupId = Integer.parseInt((String) mapData.get("groupId"));
             String accessToken = (String) mapData.get("token");
 
-            if (groupId != null && accessToken != null) {
-                hash = VKBot.hashBot(groupId, accessToken);
-                VKBot.create(groupId, accessToken);
-                c.setVkHash(hash);
-            }
+            hash = VKBot.hashBot(groupId, accessToken);
+            VKBot.create(groupId, accessToken, c);
+            c.setVkHash(hash);
+
         }
 
 

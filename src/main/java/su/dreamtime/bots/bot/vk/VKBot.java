@@ -71,6 +71,7 @@ public class VKBot {
         vkClient = new VkApiClient(client);
         actor = new GroupActor(this.groupId, this.accessToken);
         initVKCommandExecutor();
+        Main.getLogger().info("VKBot with hash \"" + hash + "\" was created");
     }
 
     /* EXECUTOR */
@@ -98,16 +99,27 @@ public class VKBot {
         }
     }
 
-    private void stop(){
-
-        if (future != null)
-            future.cancel(false);
-        if (refreshFuture == null) {
-            assert false;
-            refreshFuture.cancel(false);
+    private boolean stop(){
+        synchronized (bots) {
+            if (clients.size() > 0) {
+                return false;
+            }
+            if (future != null)
+                future.cancel(false);
+            if (refreshFuture != null) {
+                refreshFuture.cancel(false);
+            }
+            return true;
         }
     }
 
+    public void removeClient(Client c) {
+        clients.removeIf(c::equals);
+        if (stop()) {
+            bots.remove(hash);
+            Main.getLogger().info("VKBot with hash \"" + hash + "\" was removed because of no clients");
+        }
+    }
 
     private void invoke() {
         locker.lock();
@@ -163,7 +175,7 @@ public class VKBot {
             data.addClient(c);
             commands.put(command, data);
             if (future == null)
-                future = execService.scheduleAtFixedRate(this::invoke, 0L, 50L, TimeUnit.MILLISECONDS);
+                future = execService.scheduleAtFixedRate(this::invoke, 0L, 100L, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -202,16 +214,19 @@ public class VKBot {
         return bots;
     }
 
-    public static VKBot create(int groupId, String accessToken) {
-        String hash = hashBot(groupId,accessToken);
+    public static VKBot create(int groupId, String accessToken, Client c) {
+        synchronized (bots) {
+            String hash = hashBot(groupId, accessToken);
 
-        VKBot fromHash = getFromHash(hash);
-        if (fromHash != null) {
-            return fromHash;
+            VKBot fromHash = getFromHash(hash);
+            if (fromHash != null) {
+                return fromHash;
+            }
+            VKBot bot = new VKBot(groupId, accessToken);
+            bots.put(hash, bot);
+            bot.clients.add(c);
+            return bot;
         }
-        VKBot bot = new VKBot(groupId, accessToken);
-        bots.put(hash, bot);
-        return bot;
     }
 
     public static VKBot getFromHash(String hash) {
