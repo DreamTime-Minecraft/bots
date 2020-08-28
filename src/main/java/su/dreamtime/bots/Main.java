@@ -176,7 +176,7 @@ public class Main {
                 Client client = clientIterator.next();
                 if (client.getSocket().isClosed() || !client.getSocket().isConnected()) {
                     clientIterator.remove();
-                    Main.getLogger().info("Client " +client.getIp() + ":" + client.getIp() + " was disconnected");
+                    Main.getLogger().info("Client " +client.getIp() + ":" + client.getPort() + " was disconnected");
                 }
             }
         }

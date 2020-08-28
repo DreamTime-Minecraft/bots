@@ -220,6 +220,7 @@ public class VKBot {
 
             VKBot fromHash = getFromHash(hash);
             if (fromHash != null) {
+                fromHash.clients.add(c);
                 return fromHash;
             }
             VKBot bot = new VKBot(groupId, accessToken);
